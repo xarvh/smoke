@@ -25,8 +25,10 @@ uniforms theta =
             (Mat4.makeRotate (3 * theta) (vec3 0 1 0))
             (Mat4.makeRotate (2 * theta) (vec3 1 0 0))
     , perspective = Mat4.makePerspective 45 1 0.01 100
-    , camera = Mat4.makeLookAt (vec3 0 0 5) (vec3 0 0 0) (vec3 0 1 0)
-    , shade = 0.8
+    , camera =
+       Mat4.makeLookAt (vec3 0 0 5) (vec3 0 0 0) (vec3 0 1 0)
+         |> Mat4.scale3 (1/viewportWidthHeightRatio) 1 1
+    , shade = 1
     }
 
 

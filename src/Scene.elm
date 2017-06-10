@@ -1,9 +1,10 @@
-module Scene exposing (entities, viewportWidthHeightRatio)
+module Scene exposing (..)
 
 import Color exposing (Color)
 import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (vec3, Vec3)
 import WebGL exposing (Mesh, Shader)
+import WebGL.Texture exposing  (Texture)
 
 
 viewportWidthHeightRatio =
@@ -137,8 +138,8 @@ fragmentShader =
     |]
 
 
-entities : Float -> List WebGL.Entity
-entities time =
+entities : Texture -> Float -> List WebGL.Entity
+entities texture time =
     let
         theta =
             time / 5000

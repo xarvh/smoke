@@ -106,11 +106,29 @@ fragmentShader =
         uniform sampler2D texture;
         varying vec3 vcolor;
         varying vec2 vcoord;
-        void main () {
-            //gl_FragColor = shade * vec4(vcolor, 1.0);
-            gl_FragColor = texture2D(texture, vcoord);
+
+
+        float plot(vec2 st, float pct){
+          return  smoothstep( pct-0.02, pct, st.y) - smoothstep( pct, pct+0.02, st.y);
         }
 
+        float f(vec2 position) {
+          return position.x;
+        }
+
+        void main() {
+
+            float y = f(vcoord);
+
+            vec3 backgroundColor = vec3(y);
+            vec3 plotColor = vec3(1.0, 0.0, 0.0);
+
+            float lineWeight = plot(vcoord, y);
+
+            vec3 color = (1.0 - lineWeight) * backgroundColor + lineWeight * plotColor;
+
+            gl_FragColor = vec4(color, 1.0);
+        }
     |]
 
 
@@ -118,7 +136,7 @@ entities : Texture -> Float -> List WebGL.Entity
 entities texture time =
     let
         theta =
-            sin (0.001 * time) * pi / 16
+            sin (0.001 * time) * pi / 32
     in
         [ WebGL.entity
             vertexShader

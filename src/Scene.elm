@@ -5,7 +5,7 @@ import Math.Matrix4 as Mat4 exposing (Mat4)
 import Math.Vector2 as Vec2 exposing (Vec2, vec2)
 import Math.Vector3 as Vec3 exposing (Vec3, vec3)
 import WebGL exposing (Mesh, Shader)
-import WebGL.Texture exposing  (Texture)
+import WebGL.Texture exposing (Texture)
 
 
 viewportWidthHeightRatio =
@@ -44,63 +44,30 @@ type alias Vertex =
     }
 
 
-cubeMesh : Mesh Vertex
-cubeMesh =
+squareMesh =
     let
-        rft =
+        a =
+            vec3 -1 -1 0
+
+        b =
+            vec3 -1 1 0
+
+        c =
+            vec3 1 1 0
+
+        d =
+            vec3 1 -1 0
+
+        white =
             vec3 1 1 1
 
-        lft =
-            vec3 -1 1 1
-
-        lbt =
-            vec3 -1 -1 1
-
-        rbt =
-            vec3 1 -1 1
-
-        rbb =
-            vec3 1 -1 -1
-
-        rfb =
-            vec3 1 1 -1
-
-        lfb =
-            vec3 -1 1 -1
-
-        lbb =
-            vec3 -1 -1 -1
-    in
-        [ face Color.green rft rfb rbb rbt
-        , face Color.blue rft rfb lfb lft
-        , face Color.yellow rft lft lbt rbt
-        , face Color.red rfb lfb lbb rbb
-        , face Color.purple lft lfb lbb lbt
-        , face Color.orange rbt rbb lbb lbt
-        ]
-            |> List.concat
-            |> WebGL.triangles
-
-
-face : Color -> Vec3 -> Vec3 -> Vec3 -> Vec3 -> List ( Vertex, Vertex, Vertex )
-face rawColor a b c d =
-    let
-        color =
-            let
-                c =
-                    Color.toRgb rawColor
-            in
-                vec3
-                    (toFloat c.red / 255)
-                    (toFloat c.green / 255)
-                    (toFloat c.blue / 255)
-
         vertex position =
-            Vertex color position
+            Vertex white position
     in
         [ ( vertex a, vertex b, vertex c )
         , ( vertex c, vertex d, vertex a )
         ]
+            |> WebGL.triangles
 
 
 
@@ -151,11 +118,11 @@ entities : Texture -> Float -> List WebGL.Entity
 entities texture time =
     let
         theta =
-            time / 5000
+            sin (0.001 * time) * pi / 16
     in
         [ WebGL.entity
             vertexShader
             fragmentShader
-            cubeMesh
+            squareMesh
             (uniforms theta texture)
         ]

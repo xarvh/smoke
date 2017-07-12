@@ -123,9 +123,9 @@ fragmentShader =
             vec3 backgroundColor = vec3(y);
             vec3 plotColor = vec3(1.0, 0.0, 0.0);
 
-            float lineWeight = plot(vcoord, y);
+            float plotWeight = plot(vcoord, y);
 
-            vec3 color = (1.0 - lineWeight) * backgroundColor + lineWeight * plotColor;
+            vec3 color = mix(backgroundColor, plotColor, plotWeight);
 
             gl_FragColor = vec4(color, 1.0);
         }

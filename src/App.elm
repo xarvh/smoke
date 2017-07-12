@@ -1,4 +1,4 @@
-module Main exposing (main)
+module App exposing (program)
 
 import AnimationFrame
 import Html exposing (..)
@@ -51,7 +51,7 @@ loadTexture =
                 , minify = WebGL.Texture.nearest
             }
     in
-        "../assets/texture.jpg"
+        "assets/texture.jpg"
             |> WebGL.Texture.loadWith options
             |> Task.mapError toString
             |> Task.attempt OnLoadTexturesResult
@@ -107,10 +107,9 @@ subscriptions model =
         ]
 
 
-main =
-    Html.program
-        { init = init
-        , update = \msg model -> ( update msg model, Cmd.none )
-        , view = view
-        , subscriptions = subscriptions
-        }
+program =
+    { init = init
+    , update = \msg model -> ( update msg model, Cmd.none )
+    , view = view
+    , subscriptions = subscriptions
+    }

@@ -91,7 +91,7 @@ vertexShader =
         void main () {
             gl_Position = perspective * camera * rotation * vec4(position, 1.0);
             vcolor = color;
-            vcoord = position.xy;
+            vcoord = (position.xy + vec2(1.0, 1.0)) * 0.5;
         }
 
     |]
@@ -107,9 +107,8 @@ fragmentShader =
         varying vec3 vcolor;
         varying vec2 vcoord;
 
-
-        float plot(vec2 st, float pct){
-          return  smoothstep( pct-0.02, pct, st.y) - smoothstep( pct, pct+0.02, st.y);
+        float css(float apex, float width, float value) {
+          return smoothstep(apex - width, apex, value) - smoothstep(apex, apex + width, value);
         }
 
         float f(vec2 position) {
@@ -118,16 +117,21 @@ fragmentShader =
 
         void main() {
 
-            float y = f(vcoord);
+            float value = f(vcoord);
 
-            vec3 backgroundColor = vec3(y);
-            vec3 plotColor = vec3(1.0, 0.0, 0.0);
+            vec3 c1 = vec3(0.0, 0.0, 1.0);
+            vec3 c2 = vec3(1.0, 1.0, 1.0);
+            vec3 c3 = vec3(0.0, 1.0, 1.0);
+            vec3 c4 = vec3(1.0, 1.0, 0.5);
 
-            float plotWeight = plot(vcoord, y);
+            vec3 c
+              = c1 * css(0.00, 0.33, value)
+              + c2 * css(0.33, 0.33, value)
+              + c3 * css(0.66, 0.33, value)
+              + c4 * css(1.00, 0.33, value)
+              ;
 
-            vec3 color = mix(backgroundColor, plotColor, plotWeight);
-
-            gl_FragColor = vec4(color, 1.0);
+            gl_FragColor = vec4(c, 1.0);
         }
     |]
 

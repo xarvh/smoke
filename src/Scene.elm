@@ -16,20 +16,20 @@ type alias Uniforms =
     { rotation : Mat4
     , perspective : Mat4
     , camera : Mat4
-    , shade : Float
+    , duskDawn : Float
     , texture : Texture
     }
 
 
-uniforms : Float -> Texture -> Uniforms
-uniforms theta texture =
+uniforms : Float -> Float -> Texture -> Uniforms
+uniforms duskDawn theta texture =
     { rotation =
         Mat4.mul
             (Mat4.makeRotate (3 * theta) (vec3 0 1 0))
             (Mat4.makeRotate (2 * theta) (vec3 1 0 0))
     , perspective = Mat4.makePerspective 45 viewportWidthHeightRatio 0.01 100
     , camera = Mat4.makeLookAt (vec3 0 0 5) (vec3 0 0 0) (vec3 0 1 0)
-    , shade = 1
+    , duskDawn = duskDawn
     , texture = texture
     }
 
@@ -102,8 +102,10 @@ fragmentShader =
     [glsl|
 
         precision mediump float;
-        uniform float shade;
+
+        uniform float duskDawn;
         uniform sampler2D texture;
+
         varying vec3 vcolor;
         varying vec2 vcoord;
 
@@ -119,16 +121,39 @@ fragmentShader =
 
             float value = f(vcoord);
 
-            vec3 c1 = vec3(0.0, 0.0, 1.0);
-            vec3 c2 = vec3(1.0, 1.0, 1.0);
-            vec3 c3 = vec3(0.0, 1.0, 1.0);
-            vec3 c4 = vec3(1.0, 1.0, 0.5);
+            vec3 dusk
+              = vec3(0.4, 0.4, 0.6) * css(0.00, 0.33, value)
+              + vec3(0.9, 0.8, 0.6) * css(0.33, 0.33, value)
+              + vec3(0.9, 0.6, 0.3) * css(0.66, 0.33, value)
+              + vec3(0.9, 0.3, 0.1) * css(1.00, 0.33, value)
+              ;
+
+            vec3 night
+              = vec3(0.0, 0.0, 0.2) * css(0.00, 0.33, value)
+              + vec3(0.5, 0.4, 0.2) * css(0.33, 0.33, value)
+              + vec3(0.5, 0.2, 0.0) * css(0.66, 0.33, value)
+              + vec3(0.5, 0.0, 0.0) * css(1.00, 0.33, value)
+              ;
+
+            vec3 dawn
+              = vec3(0.4, 0.4, 0.6) * css(1.00, 0.33, value)
+              + vec3(0.9, 0.8, 0.6) * css(0.66, 0.33, value)
+              + vec3(0.9, 0.6, 0.3) * css(0.33, 0.33, value)
+              + vec3(0.9, 0.3, 0.1) * css(0.00, 0.33, value)
+              ;
+
+            vec3 day
+              = vec3(0.4, 0.4, 0.9) * css(0.00, 0.33, value)
+              + vec3(0.9, 0.8, 0.9) * css(0.33, 0.33, value)
+              + vec3(0.9, 0.6, 0.7) * css(0.66, 0.33, value)
+              + vec3(0.9, 0.3, 0.5) * css(1.00, 0.33, value)
+              ;
 
             vec3 c
-              = c1 * css(0.00, 0.33, value)
-              + c2 * css(0.33, 0.33, value)
-              + c3 * css(0.66, 0.33, value)
-              + c4 * css(1.00, 0.33, value)
+              = dusk  * css(0.00, 0.33, duskDawn)
+              + night * css(0.33, 0.33, duskDawn)
+              + dawn  * css(0.66, 0.33, duskDawn)
+              + day   * css(1.00, 0.33, duskDawn)
               ;
 
             gl_FragColor = vec4(c, 1.0);
@@ -139,6 +164,14 @@ fragmentShader =
 entities : Texture -> Float -> List WebGL.Entity
 entities texture time =
     let
+        ddSpeed =
+            0.00007
+
+        duskDawn =
+            (ddSpeed * time) - (toFloat <| floor <| ddSpeed * time)
+            |> Debug.log "d"
+
+
         theta =
             sin (0.001 * time) * pi / 32
     in
@@ -146,5 +179,5 @@ entities texture time =
             vertexShader
             fragmentShader
             squareMesh
-            (uniforms theta texture)
+            (uniforms duskDawn theta texture)
         ]
